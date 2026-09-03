@@ -19,7 +19,6 @@ import { ModulesSection } from "@/components/dashboard/modules";
 import { CoursesSection } from "@/components/dashboard/courses";
 import { StatsSection } from "@/components/dashboard/stats";
 import { TrackerSection } from "@/components/dashboard/tracker";
-import { ReviewSection } from "@/components/dashboard/review";
 import { BankBoundary } from "@/components/dashboard/bank-boundary";
 import { supabase } from "@/integrations/supabase/external";
 import { clearSessionCache } from "@/lib/auth-session";
@@ -127,10 +126,6 @@ function DashboardPage() {
           ) : active === "Tracker" ? (
             <BankBoundary rows={4}>
               <TrackerSection />
-            </BankBoundary>
-          ) : active === "Review" ? (
-            <BankBoundary rows={2}>
-              <ReviewSection />
             </BankBoundary>
           ) : (
             <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center">

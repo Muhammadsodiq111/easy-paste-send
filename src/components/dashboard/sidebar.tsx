@@ -9,7 +9,6 @@ import {
   GraduationCap,
   Home,
   LayoutGrid,
-  Repeat2,
   Send,
   Spline,
   type LucideIcon,
@@ -37,7 +36,6 @@ const groups: Group[] = [
     label: "Practice",
     items: [
       { label: "Mocks", icon: ClipboardCheck, to: "/mocks" },
-      { label: "Review", icon: Repeat2 },
     ],
   },
   {
