@@ -372,6 +372,7 @@ create table if not exists public.vocab_progress (
   user_id uuid not null default auth.uid(),
   word_id uuid not null references public.vocab_words(id) on delete cascade,
   known boolean not null default false,
+  known_at timestamptz,
   flagged boolean not null default false,
   own_sentence text,
   created_at timestamptz not null default now(),
