@@ -73,7 +73,7 @@ export function TrackerSection() {
   const { data: rows } = useSuspenseQuery(questionBankQuery);
   const [openTopic, setOpenTopic] = useState<string | null>(null);
   const [openBucket, setOpenBucket] = useState<string | null>(null);
-  const { entries, entry, cycleStatus, toggleStar, setNote, reset } = useTrackerProgress();
+  const { entries, entry, toggleStar, setNote, reset } = useTrackerProgress();
   const [openNote, setOpenNote] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
