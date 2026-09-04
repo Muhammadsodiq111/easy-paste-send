@@ -239,11 +239,15 @@ export function TrackerSection() {
                                                 </button>
                                               </td>
                                               <td className="py-2 text-center">
-                                                <button
-                                                  type="button"
-                                                  aria-label="Toggle status"
-                                                  onClick={() => cycleStatus(id)}
-                                                  className={`mx-auto grid size-6 place-items-center rounded-md border ${
+                                                <span
+                                                  role="img"
+                                                  aria-label={`Status: ${st}`}
+                                                  title={
+                                                    st === "unattempted"
+                                                      ? "Solve this question in Practice to set its status"
+                                                      : `Status: ${st} — earned by solving in Practice`
+                                                  }
+                                                  className={`mx-auto grid size-6 cursor-default place-items-center rounded-md border ${
                                                     st === "correct"
                                                       ? "border-emerald text-emerald"
                                                       : st === "incorrect"
@@ -256,7 +260,7 @@ export function TrackerSection() {
                                                   ) : (
                                                     <Check size={13} />
                                                   )}
-                                                </button>
+                                                </span>
                                               </td>
                                                <td className="py-2 text-center">
                                                  <button
