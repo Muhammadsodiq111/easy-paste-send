@@ -96,6 +96,7 @@ type VocabProgressRow = Timestamps & {
   user_id: string;
   word_id: string;
   known: boolean;
+  known_at: string | null;
   flagged: boolean;
   own_sentence: string | null;
 };
