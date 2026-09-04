@@ -210,7 +210,13 @@ export function TrackerSection() {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {b.ids.map((id) => {
+                                        {[...b.ids]
+                                          .sort(
+                                            (a, b) =>
+                                              Number(entry(b).starred) -
+                                              Number(entry(a).starred),
+                                          )
+                                          .map((id) => {
                                           const shortId = id.slice(0, 7);
                                           if (query && !shortId.includes(query.toLowerCase()))
                                             return null;
