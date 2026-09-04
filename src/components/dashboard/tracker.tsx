@@ -243,7 +243,7 @@ export function TrackerSection() {
                                                   type="button"
                                                   aria-label="Toggle status"
                                                   onClick={() => cycleStatus(id)}
-                                                  className={`grid size-6 place-items-center rounded-md border ${
+                                                  className={`mx-auto grid size-6 place-items-center rounded-md border ${
                                                     st === "correct"
                                                       ? "border-emerald text-emerald"
                                                       : st === "incorrect"

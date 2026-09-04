@@ -1,13 +1,15 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Check, LogOut, Pencil, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { supabase } from "@/integrations/supabase/external";
 import { clearSessionCache } from "@/lib/auth-session";
 import {
+  countStudiedToday,
   saveDailyGoal,
+  utcDayStart,
   vocabGoalQuery,
   vocabProgressQuery,
   vocabWordsQuery,
@@ -67,7 +69,18 @@ function VocabPage() {
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pageCount - 1);
   const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
-  const studied = Object.values(progress).filter((p) => p.known).length;
+
+  // Daily goal counts only words learned since 00:00 UTC; re-check each minute so
+  // the ring drops back to 0 at midnight UTC without a reload.
+  const [dayStart, setDayStart] = useState(() => utcDayStart());
+  useEffect(() => {
+    const t = setInterval(() => {
+      const next = utcDayStart();
+      setDayStart((prev) => (prev === next ? prev : next));
+    }, 60_000);
+    return () => clearInterval(t);
+  }, []);
+  const studied = useMemo(() => countStudiedToday(progress, dayStart), [progress, dayStart]);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();

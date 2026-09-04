@@ -31,9 +31,20 @@ export type VocabWord = {
 export type VocabProgress = {
   word_id: string;
   known: boolean;
+  known_at: string | null;
   flagged: boolean;
   own_sentence: string | null;
 };
+
+/** ISO timestamp of the current UTC day's start (00:00 UTC). */
+export function utcDayStart(now = new Date()): string {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
+}
+
+/** Words marked known since 00:00 UTC today — this is what the daily goal counts. */
+export function countStudiedToday(progress: Record<string, VocabProgress>, dayStart = utcDayStart()): number {
+  return Object.values(progress).filter((p) => p.known && p.known_at && p.known_at >= dayStart).length;
+}
 
 // PostgREST caps a single response at 1000 rows, so page through the table.
 const PAGE_SIZE = 1000;
@@ -67,7 +78,7 @@ export const vocabProgressQuery = () => ({
     for (let from = 0; ; from += PAGE_SIZE) {
       const { data, error } = await supabase
         .from("vocab_progress")
-        .select("word_id, known, flagged, own_sentence")
+        .select("word_id, known, known_at, flagged, own_sentence")
         .range(from, from + PAGE_SIZE - 1);
       if (error) throw error;
       const rows = (data ?? []) as VocabProgress[];
@@ -99,8 +110,11 @@ export async function saveProgress(
   wordId: string,
   patch: Partial<Pick<VocabProgress, "known" | "flagged" | "own_sentence">>,
 ) {
+  // known_at stamps when a word was learned so the daily goal can reset at 00:00 UTC.
+  const stamp =
+    patch.known === true ? { known_at: new Date().toISOString() } : patch.known === false ? { known_at: null } : {};
   const { error } = await supabase
     .from("vocab_progress")
-    .upsert({ user_id: userId, word_id: wordId, ...patch }, { onConflict: "user_id,word_id" });
+    .upsert({ user_id: userId, word_id: wordId, ...patch, ...stamp }, { onConflict: "user_id,word_id" });
   if (error) throw error;
 }
