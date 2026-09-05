@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Calculator, ChevronDown, ChevronRight, Eye, EyeOff, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -17,6 +17,7 @@ import {
   subtopicsFromRows,
   type Level,
 } from "@/lib/practice";
+import { findLessonForPractice, nextModuleTitle } from "@/lib/practice-nav";
 import { useTrackerProgress } from "@/lib/tracker-progress";
 
 
@@ -132,6 +133,26 @@ function PracticePage() {
 
 
 
+  const allQuestionIds = useMemo(() => subtopics.flatMap((s) => s.questions.map((q) => q.id)), [subtopics]);
+  const allSolved =
+    mode === "practice" && allQuestionIds.length > 0 && allQuestionIds.every((id) => results[id]);
+  const [showAllDone, setShowAllDone] = useState(false);
+  const nextModule = nextModuleTitle(moduleTitle);
+
+  useEffect(() => {
+    if (allSolved) setShowAllDone(true);
+  }, [allSolved]);
+
+  function restartChapter() {
+    setResults({});
+    setShowAllDone(false);
+    const first = subtopics[0];
+    if (first?.questions[0]) {
+      setOpenSubtopic(first.id);
+      goTo(first.id, first.questions[0].id);
+    }
+  }
+
   function next() {
     const all = subtopics.flatMap((s) => s.questions.map((q) => ({ s: s.id, q: q.id })));
     if (all.length === 0 || !question) return;
@@ -140,9 +161,19 @@ function PracticePage() {
       setShowSummary(true);
       return;
     }
-    const nxt = all[(i + 1) % all.length]!;
-    setOpenSubtopic(nxt.s);
-    goTo(nxt.s, nxt.q);
+    if (allSolved) {
+      setShowAllDone(true);
+      return;
+    }
+    // Skip to the next unanswered question, wrapping around.
+    for (let k = 1; k <= all.length; k++) {
+      const cand = all[(i + k) % all.length]!;
+      if (!results[cand.q]) {
+        setOpenSubtopic(cand.s);
+        goTo(cand.s, cand.q);
+        return;
+      }
+    }
   }
 
   function toggleWidget(id: WidgetId) {
@@ -240,12 +271,20 @@ function PracticePage() {
 
                 {open ? (
                   <div className="space-y-4 pb-3">
-                    <button
-                      type="button"
-                      className="w-full rounded-xl border border-primary/40 px-3 py-2 text-sm font-semibold text-primary"
-                    >
-                      View Lesson
-                    </button>
+                    {(() => {
+                      const lesson = findLessonForPractice(moduleTitle, s.title);
+                      const cls =
+                        "block w-full rounded-xl border border-primary/40 px-3 py-2 text-center text-sm font-semibold text-primary hover:bg-accent";
+                      return lesson ? (
+                        <Link to="/lessons/$slug" params={{ slug: lesson.slug }} className={cls}>
+                          View Lesson
+                        </Link>
+                      ) : (
+                        <Link to="/dashboard" search={{ section: "Courses" }} className={cls}>
+                          View Lesson
+                        </Link>
+                      );
+                    })()}
 
                     <div>
                       <p className="text-xs font-bold text-emerald">
@@ -444,13 +483,23 @@ function PracticePage() {
 
             <div className="flex justify-end border-t border-border p-4">
               {checked ? (
-                <button
-                  type="button"
-                  onClick={next}
-                  className="rounded-xl bg-emerald px-6 py-2.5 text-sm font-bold text-primary-foreground"
-                >
-                  Next ›
-                </button>
+                allSolved ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllDone(true)}
+                    className="rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground"
+                  >
+                    Chapter complete ›
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={next}
+                    className="rounded-xl bg-emerald px-6 py-2.5 text-sm font-bold text-primary-foreground"
+                  >
+                    Next ›
+                  </button>
+                )
               ) : (
                 <button
                   type="button"
@@ -466,6 +515,59 @@ function PracticePage() {
           )}
         </main>
       </div>
+
+      {showAllDone ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="all-done-title"
+          className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4"
+          onClick={() => setShowAllDone(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs font-bold tracking-[0.12em] text-emerald uppercase">Chapter complete</p>
+            <h2 id="all-done-title" className="font-display mt-2 text-xl font-semibold text-foreground">
+              You have solved all the questions for {moduleTitle}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {allQuestionIds.filter((id) => results[id] === "correct").length} of {allQuestionIds.length} correct.
+              What would you like to do next?
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              {nextModule ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAllDone(false);
+                    setResults({});
+                    navigate({ to: "/practice", search: { module: nextModule, mode: "practice" } });
+                  }}
+                  className="rounded-xl bg-emerald px-5 py-2.5 text-sm font-bold text-primary-foreground"
+                >
+                  Next chapter: {nextModule} ›
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={restartChapter}
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+              >
+                Solve this chapter again
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/dashboard", search: { section: "Modules" } })}
+                className="rounded-xl border border-border px-5 py-2.5 text-sm font-bold text-foreground"
+              >
+                Back to dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <PracticeWidgets open={widgets} onClose={(id) => setWidgets((w) => w.filter((x) => x !== id))} />
     </div>

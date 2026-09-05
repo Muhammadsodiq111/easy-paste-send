@@ -1,11 +1,11 @@
 {
-  "asset_id": "e9654efb-2169-4abe-b5dd-8ffe5d35d701",
-  "content_type": "image/png",
-  "created_at": "2026-08-10T05:16:51Z",
+  "version": 1,
+  "asset_id": "5554d6a1-9abe-4325-b847-b8b66c0da13a",
+  "project_id": "87adba46-9f74-4ee2-b5f6-54b00e027cc8",
+  "url": "/__l5e/assets-v1/5554d6a1-9abe-4325-b847-b8b66c0da13a/sat-reference-formulas.png",
+  "r2_key": "a/v1/87adba46-9f74-4ee2-b5f6-54b00e027cc8/5554d6a1-9abe-4325-b847-b8b66c0da13a/sat-reference-formulas.png",
   "original_filename": "sat-reference-formulas.png",
-  "project_id": "83f47bc0-486a-474a-9b66-58cb8e1acde3",
-  "r2_key": "a/v1/83f47bc0-486a-474a-9b66-58cb8e1acde3/e9654efb-2169-4abe-b5dd-8ffe5d35d701/sat-reference-formulas.png",
   "size": 232910,
-  "url": "/__l5e/assets-v1/e9654efb-2169-4abe-b5dd-8ffe5d35d701/sat-reference-formulas.png",
-  "version": 1
+  "content_type": "image/png",
+  "created_at": "2026-09-05T08:00:51Z"
 }
