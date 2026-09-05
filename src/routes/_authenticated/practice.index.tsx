@@ -139,6 +139,10 @@ function PracticePage() {
   const [showAllDone, setShowAllDone] = useState(false);
   const nextModule = nextModuleTitle(moduleTitle);
 
+  useEffect(() => {
+    if (allSolved) setShowAllDone(true);
+  }, [allSolved]);
+
   function restartChapter() {
     setResults({});
     setShowAllDone(false);
