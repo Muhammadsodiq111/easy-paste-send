@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Calculator, ChevronDown, ChevronRight, Eye, EyeOff, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -17,6 +17,7 @@ import {
   subtopicsFromRows,
   type Level,
 } from "@/lib/practice";
+import { findLessonForPractice, nextModuleTitle } from "@/lib/practice-nav";
 import { useTrackerProgress } from "@/lib/tracker-progress";
 
 
@@ -132,6 +133,22 @@ function PracticePage() {
 
 
 
+  const allQuestionIds = useMemo(() => subtopics.flatMap((s) => s.questions.map((q) => q.id)), [subtopics]);
+  const allSolved =
+    mode === "practice" && allQuestionIds.length > 0 && allQuestionIds.every((id) => results[id]);
+  const [showAllDone, setShowAllDone] = useState(false);
+  const nextModule = nextModuleTitle(moduleTitle);
+
+  function restartChapter() {
+    setResults({});
+    setShowAllDone(false);
+    const first = subtopics[0];
+    if (first?.questions[0]) {
+      setOpenSubtopic(first.id);
+      goTo(first.id, first.questions[0].id);
+    }
+  }
+
   function next() {
     const all = subtopics.flatMap((s) => s.questions.map((q) => ({ s: s.id, q: q.id })));
     if (all.length === 0 || !question) return;
@@ -140,9 +157,19 @@ function PracticePage() {
       setShowSummary(true);
       return;
     }
-    const nxt = all[(i + 1) % all.length]!;
-    setOpenSubtopic(nxt.s);
-    goTo(nxt.s, nxt.q);
+    if (allSolved) {
+      setShowAllDone(true);
+      return;
+    }
+    // Skip to the next unanswered question, wrapping around.
+    for (let k = 1; k <= all.length; k++) {
+      const cand = all[(i + k) % all.length]!;
+      if (!results[cand.q]) {
+        setOpenSubtopic(cand.s);
+        goTo(cand.s, cand.q);
+        return;
+      }
+    }
   }
 
   function toggleWidget(id: WidgetId) {
