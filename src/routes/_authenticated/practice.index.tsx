@@ -240,12 +240,20 @@ function PracticePage() {
 
                 {open ? (
                   <div className="space-y-4 pb-3">
-                    <button
-                      type="button"
-                      className="w-full rounded-xl border border-primary/40 px-3 py-2 text-sm font-semibold text-primary"
-                    >
-                      View Lesson
-                    </button>
+                    {(() => {
+                      const lesson = findLessonForPractice(moduleTitle, s.title);
+                      const cls =
+                        "block w-full rounded-xl border border-primary/40 px-3 py-2 text-center text-sm font-semibold text-primary hover:bg-accent";
+                      return lesson ? (
+                        <Link to="/lessons/$slug" params={{ slug: lesson.slug }} className={cls}>
+                          View Lesson
+                        </Link>
+                      ) : (
+                        <Link to="/dashboard" search={{ section: "Courses" }} className={cls}>
+                          View Lesson
+                        </Link>
+                      );
+                    })()}
 
                     <div>
                       <p className="text-xs font-bold text-emerald">
