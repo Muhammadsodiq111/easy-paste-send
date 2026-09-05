@@ -479,13 +479,23 @@ function PracticePage() {
 
             <div className="flex justify-end border-t border-border p-4">
               {checked ? (
-                <button
-                  type="button"
-                  onClick={next}
-                  className="rounded-xl bg-emerald px-6 py-2.5 text-sm font-bold text-primary-foreground"
-                >
-                  Next ›
-                </button>
+                allSolved ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllDone(true)}
+                    className="rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground"
+                  >
+                    Chapter complete ›
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={next}
+                    className="rounded-xl bg-emerald px-6 py-2.5 text-sm font-bold text-primary-foreground"
+                  >
+                    Next ›
+                  </button>
+                )
               ) : (
                 <button
                   type="button"
@@ -501,6 +511,59 @@ function PracticePage() {
           )}
         </main>
       </div>
+
+      {showAllDone ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="all-done-title"
+          className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4"
+          onClick={() => setShowAllDone(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs font-bold tracking-[0.12em] text-emerald uppercase">Chapter complete</p>
+            <h2 id="all-done-title" className="font-display mt-2 text-xl font-semibold text-foreground">
+              You have solved all the questions for {moduleTitle}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {allQuestionIds.filter((id) => results[id] === "correct").length} of {allQuestionIds.length} correct.
+              What would you like to do next?
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              {nextModule ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAllDone(false);
+                    setResults({});
+                    navigate({ to: "/practice", search: { module: nextModule, mode: "practice" } });
+                  }}
+                  className="rounded-xl bg-emerald px-5 py-2.5 text-sm font-bold text-primary-foreground"
+                >
+                  Next chapter: {nextModule} ›
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={restartChapter}
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+              >
+                Solve this chapter again
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/dashboard", search: { section: "Modules" } })}
+                className="rounded-xl border border-border px-5 py-2.5 text-sm font-bold text-foreground"
+              >
+                Back to dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <PracticeWidgets open={widgets} onClose={(id) => setWidgets((w) => w.filter((x) => x !== id))} />
     </div>
