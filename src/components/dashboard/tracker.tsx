@@ -80,16 +80,19 @@ export function TrackerSection() {
   const domains = useMemo(() => buildDomains(rows), [rows]);
 
   const totals = useMemo(() => {
-    const values = Object.values(entries).map((e) => e.status);
+    // Only count questions that still exist in the bank — stale rows from
+    // deleted questions used to push the percentage above 100%.
+    const values = rows.map((r) => entries[r.id]?.status ?? "unattempted");
     return {
       correct: values.filter((v) => v === "correct").length,
       incorrect: values.filter((v) => v === "incorrect").length,
       attempted: values.filter((v) => v !== "unattempted").length,
     };
-  }, [entries]);
+  }, [entries, rows]);
 
   const grandTotal = rows.length;
-  const pct = grandTotal ? Math.round((totals.attempted / grandTotal) * 100) : 0;
+  const pct = grandTotal ? Math.min(100, Math.round((totals.attempted / grandTotal) * 100)) : 0;
+
 
   const attemptedIds = (ids: string[]) =>
     ids.filter((id) => entry(id).status !== "unattempted").length;

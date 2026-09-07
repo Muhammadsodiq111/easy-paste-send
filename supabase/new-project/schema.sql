@@ -428,3 +428,45 @@ create trigger vocab_goals_updated_at before update on public.vocab_goals
 -- insert into public.user_roles (user_id, role)
 -- select id, 'admin'::public.app_role from auth.users where email = 'you@example.com'
 -- on conflict (user_id, role) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Site-wide leaderboard (ranks every user by correct answers, then accuracy).
+-- Security definer so each signed-in user can read aggregate rows only.
+-- ---------------------------------------------------------------------------
+create or replace function public.leaderboard()
+returns table (
+  user_id uuid,
+  name text,
+  correct integer,
+  attempted integer,
+  accuracy numeric,
+  rank integer
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  with agg as (
+    select
+      t.user_id,
+      count(*) filter (where t.status = 'correct')::int as correct,
+      count(*) filter (where t.status in ('correct','incorrect'))::int as attempted
+    from public.tracker_progress t
+    group by t.user_id
+  )
+  select
+    a.user_id,
+    coalesce(nullif(p.full_name, ''), split_part(coalesce(p.email, ''), '@', 1), 'Student') as name,
+    a.correct,
+    a.attempted,
+    case when a.attempted > 0 then round((a.correct::numeric / a.attempted) * 100, 0) else 0 end as accuracy,
+    rank() over (order by a.correct desc, a.attempted asc)::int as rank
+  from agg a
+  left join public.profiles p on p.id = a.user_id
+  where a.attempted > 0
+  order by rank
+$$;
+
+revoke all on function public.leaderboard() from public;
+grant execute on function public.leaderboard() to authenticated;

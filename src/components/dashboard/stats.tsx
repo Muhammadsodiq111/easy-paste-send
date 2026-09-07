@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { DIFFICULTY_LEVELS, questionBankQuery, type Level } from "@/lib/practice";
+import { useTrackerProgress } from "@/lib/tracker-progress";
+import { LeaderboardCard } from "@/components/dashboard/leaderboard";
 
 type Tf = "week" | "month" | "all";
 
@@ -22,34 +24,30 @@ const TIME_BY_AREA = [
 
 export function StatsSection() {
   const { data: rows } = useSuspenseQuery(questionBankQuery);
+  const { entry } = useTrackerProgress();
   const [progressTf, setProgressTf] = useState<Tf>("all");
   const [timeTf, setTimeTf] = useState<Tf>("all");
-  const [subtopicTab, setSubtopicTab] = useState<"strongest" | "weakest">("strongest");
-  const [subject, setSubject] = useState<"all" | "math" | "rw">("all");
 
   const DIFFICULTY = useMemo(
     () =>
-      DIFFICULTY_LEVELS.map((level) => ({
-        ...LEVEL_META[level],
-        done: 0,
-        acc: 0,
-        total: rows.filter((r) => r.level === level).length,
-      })),
-    [rows],
-  );
-
-  const subjectCounts = useMemo(
-    () => ({
-      all: rows.length,
-      math: rows.filter((r) => r.subject === "math").length,
-      rw: rows.filter((r) => r.subject === "english").length,
-    }),
-    [rows],
+      DIFFICULTY_LEVELS.map((level) => {
+        const levelRows = rows.filter((r) => r.level === level);
+        const statuses = levelRows.map((r) => entry(r.id).status);
+        const done = statuses.filter((s) => s !== "unattempted").length;
+        const correct = statuses.filter((s) => s === "correct").length;
+        return {
+          ...LEVEL_META[level],
+          done,
+          acc: done ? Math.round((correct / done) * 100) : 0,
+          total: levelRows.length,
+        };
+      }),
+    [rows, entry],
   );
 
   const attempted = DIFFICULTY.reduce((s, d) => s + d.done, 0);
   const totalQs = DIFFICULTY.reduce((s, d) => s + d.total, 0);
-  const pct = totalQs ? Math.round((attempted / totalQs) * 100) : 0;
+  const pct = totalQs ? Math.min(100, Math.round((attempted / totalQs) * 100)) : 0;
 
   return (
     <div className="space-y-5">
@@ -87,33 +85,6 @@ export function StatsSection() {
         </Card>
 
         <Card>
-          <CardHeader title="Recent Activity" />
-          <div className="max-h-64 overflow-y-auto px-5">
-            <p className="py-16 text-center text-sm text-muted-foreground">
-              No activity yet — start practicing to fill this in.
-            </p>
-          </div>
-        </Card>
-
-        <Card>
-          <CardHeader title="Study Activity">
-            <span className="text-sm font-semibold text-muted-foreground">Last 13 weeks</span>
-          </CardHeader>
-          <div className="p-5">
-            <Heatmap />
-            <div className="mt-3 flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
-              <span>Less</span>
-              {["bg-muted", "bg-primary/20", "bg-primary/40", "bg-primary/70", "bg-primary"].map(
-                (c) => (
-                  <span key={c} className={`size-3 rounded-[3px] ${c}`} />
-                ),
-              )}
-              <span>More</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
           <CardHeader title="Time by Area">
             <Timeframe value={timeTf} onChange={setTimeTf} />
           </CardHeader>
@@ -135,55 +106,11 @@ export function StatsSection() {
         </Card>
       </div>
 
-      <Card>
-        <div className="flex gap-6 border-b border-border px-5 pt-4">
-          {(["strongest", "weakest"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setSubtopicTab(t)}
-              className={`-mb-px border-b-2 pb-3 text-sm font-bold capitalize transition-colors ${
-                subtopicTab === t
-                  ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground"
-              }`}
-            >
-              {t} Subtopics
-            </button>
-          ))}
-        </div>
-        <div className="p-5">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {(
-              [
-                { key: "all", label: "All", color: "text-foreground" },
-                { key: "math", label: "Math", color: "text-primary" },
-                { key: "rw", label: "Reading & Writing", color: "text-violet" },
-              ] as const
-            ).map((s) => (
-              <button
-                key={s.key}
-                type="button"
-                onClick={() => setSubject(s.key)}
-                className={`rounded-2xl border px-4 py-3 text-left transition-colors ${
-                  subject === s.key ? "border-foreground" : "border-border"
-                }`}
-              >
-                <p className={`text-sm font-bold ${s.color}`}>{s.label}</p>
-                <p className="text-xs text-muted-foreground">
-                  {subjectCounts[s.key].toLocaleString()} questions
-                </p>
-              </button>
-            ))}
-          </div>
-          <p className="py-14 text-center text-sm text-muted-foreground">
-            Not enough data yet — answer some questions to see your {subtopicTab} subtopics.
-          </p>
-        </div>
-      </Card>
+      <LeaderboardCard />
     </div>
   );
 }
+
 
 function Timeframe({ value, onChange }: { value: Tf; onChange: (v: Tf) => void }) {
   const opts: { key: Tf; label: string }[] = [
