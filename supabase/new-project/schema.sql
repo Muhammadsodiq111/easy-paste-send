@@ -453,7 +453,11 @@ as $$
       count(*) filter (where t.status = 'correct')::int as correct,
       count(*) filter (where t.status in ('correct','incorrect'))::int as attempted
     from public.tracker_progress t
+    -- Only count progress for questions that still exist in the bank,
+    -- so rows left behind by deleted questions never inflate the totals.
+    join public.practice_questions q on q.id::text = t.question_id::text
     group by t.user_id
+
   )
   select
     a.user_id,
