@@ -17,7 +17,7 @@ export const STUDY_AREA_LABEL: Record<StudyArea, string> = {
   mocks: "Mock Exams",
   courses: "Courses",
   vocab: "Vocab",
-  review: "Mistake Review",
+  review: "Reading",
   lessons: "Lessons",
 };
 

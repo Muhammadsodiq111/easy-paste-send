@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/reading/$slug")({
 });
 
 function ReaderPage() {
-  useStudyClock("courses");
+  useStudyClock("review");
   const { slug } = Route.useParams();
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
