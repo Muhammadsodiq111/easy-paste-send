@@ -4,7 +4,7 @@ import { Calculator, ChevronDown, ChevronRight, Eye, EyeOff, X } from "lucide-re
 import { useEffect, useMemo, useState } from "react";
 
 import { DesmosCalculator } from "@/components/practice/desmos-calculator";
-import { MathExplanation, MathLine } from "@/components/practice/math-text";
+import { MathExplanation, MathInline, MathLine } from "@/components/practice/math-text";
 import { PracticeWidgets, type WidgetId } from "@/components/practice/widgets";
 
 
@@ -424,7 +424,7 @@ function PracticePage() {
                         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-md text-xs font-bold ${badge}`}>
                           {letter}
                         </span>
-                        <span className="text-sm text-foreground">{choice}</span>
+                        <span className="text-sm text-foreground"><MathInline text={choice} /></span>
                       </button>
                     );
                   })}
