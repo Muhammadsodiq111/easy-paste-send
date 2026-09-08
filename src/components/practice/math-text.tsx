@@ -40,6 +40,18 @@ function isAutoMath(token: string) {
   return AUTO_MATH.test(t) && /[0-9A-Za-z]/.test(t);
 }
 
+/** A word that can take part in a formula: 2y, (y, +, 2)/2, =, 1. */
+const MATH_WORD = /^[A-Za-z0-9().+\-*/^_=<>|,]+$/;
+
+function isMathWord(token: string) {
+  const core = token.replace(/[.,;:!?]+$/, "");
+  if (!core) return false;
+  if (!MATH_WORD.test(core)) return false;
+  if (/^[A-Za-z]{2,}$/.test(core)) return false; // plain words like "if" or "value"
+  return /[0-9]/.test(core) || /[+\-*/^=<>()]/.test(core) || /^[A-Za-z]$/.test(core);
+}
+
+
 /** Inline segments: **bold**, *italic*, $math$, plus auto-detected math tokens. */
 function renderInline(text: string, keyBase: string): ReactNode[] {
   const out: ReactNode[] = [];
