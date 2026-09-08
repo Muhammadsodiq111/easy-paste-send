@@ -51,6 +51,11 @@ function isMathWord(token: string) {
   return /[0-9]/.test(core) || /[+\-*/^=<>()]/.test(core) || /^[A-Za-z]$/.test(core);
 }
 
+/** Inline math-aware text: use for answer choices, labels, short strings. */
+export function MathInline({ text }: { text: string }) {
+  return <>{renderInline(text, "inline")}</>;
+}
+
 
 /** Inline segments: **bold**, *italic*, $math$, plus auto-detected math tokens. */
 function renderInline(text: string, keyBase: string): ReactNode[] {
