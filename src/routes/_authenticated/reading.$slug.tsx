@@ -1,3 +1,4 @@
+import { useStudyClock } from "@/lib/study-time";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, ChevronRight, Clock, Eraser, X } from "lucide-react";
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/_authenticated/reading/$slug")({
 });
 
 function ReaderPage() {
+  useStudyClock("review");
   const { slug } = Route.useParams();
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();

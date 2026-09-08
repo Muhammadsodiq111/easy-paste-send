@@ -91,7 +91,8 @@ export function TrackerSection() {
   }, [entries, rows]);
 
   const grandTotal = rows.length;
-  const pct = grandTotal ? Math.min(100, Math.round((totals.attempted / grandTotal) * 100)) : 0;
+  const pct = totals.attempted ? Math.round((totals.correct / totals.attempted) * 100) : 0;
+
 
 
   const attemptedIds = (ids: string[]) =>
@@ -344,8 +345,9 @@ export function TrackerSection() {
         <section className="rounded-3xl border border-border bg-card p-5 shadow-[0_20px_60px_-45px_rgba(20,40,90,0.45)]">
           <h3 className="font-display text-base font-semibold text-foreground">Stats</h3>
           <p className="mt-4 text-center text-sm font-semibold text-muted-foreground">
-            Overall Progress
+            Overall Accuracy
           </p>
+
           <div className="relative mx-auto mt-3 grid size-32 place-items-center">
             <svg viewBox="0 0 130 130" className="size-32 -rotate-90">
               <circle cx="65" cy="65" r="52" fill="none" strokeWidth="14" className="stroke-muted" />
@@ -362,7 +364,10 @@ export function TrackerSection() {
             </svg>
             <div className="absolute text-center">
               <p className="font-display text-xl font-semibold text-foreground">{pct}%</p>
-              <p className="text-[11px] text-muted-foreground">attempted</p>
+              <p className="text-[11px] text-muted-foreground">
+                {totals.correct}/{totals.attempted} correct
+              </p>
+
             </div>
           </div>
 

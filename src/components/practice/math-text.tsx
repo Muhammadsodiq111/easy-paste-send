@@ -40,6 +40,23 @@ function isAutoMath(token: string) {
   return AUTO_MATH.test(t) && /[0-9A-Za-z]/.test(t);
 }
 
+/** A word that can take part in a formula: 2y, (y, +, 2)/2, =, 1. */
+const MATH_WORD = /^[A-Za-z0-9().+\-*/^_=<>|,]+$/;
+
+function isMathWord(token: string) {
+  const core = token.replace(/[.,;:!?]+$/, "");
+  if (!core) return false;
+  if (!MATH_WORD.test(core)) return false;
+  if (/^[A-Za-z]{2,}$/.test(core)) return false; // plain words like "if" or "value"
+  return /[0-9]/.test(core) || /[+\-*/^=<>()]/.test(core) || /^[A-Za-z]$/.test(core);
+}
+
+/** Inline math-aware text: use for answer choices, labels, short strings. */
+export function MathInline({ text }: { text: string }) {
+  return <>{renderInline(text, "inline")}</>;
+}
+
+
 /** Inline segments: **bold**, *italic*, $math$, plus auto-detected math tokens. */
 function renderInline(text: string, keyBase: string): ReactNode[] {
   const out: ReactNode[] = [];
@@ -50,22 +67,54 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
 
   const pushPlain = (chunk: string, k: string) => {
     if (!chunk) return;
-    chunk.split(/(\s+)/).forEach((piece, pi) => {
-      if (!piece) return;
+    const pieces = chunk.split(/(\s+)/).filter((p) => p !== "");
+    let idx = 0;
+    let group = 0;
+
+    while (idx < pieces.length) {
+      const piece = pieces[idx]!;
       if (/^\s+$/.test(piece)) {
         out.push(piece);
-        return;
+        idx += 1;
+        continue;
       }
-      if (isAutoMath(piece)) {
-        const trail = piece.match(/[.,;:!?]+$/)?.[0] ?? "";
-        const core = trail ? piece.slice(0, -trail.length) : piece;
-        out.push(<Tex key={`${k}-m${pi}`} tex={toDesmosLatex(core)} />);
+
+      // Collect the longest run of consecutive math-looking words so a whole
+      // expression like "(y + 2)/2 - 3 = 1" renders as one typeset formula.
+      const run: string[] = [];
+      let scan = idx;
+      let lastMath = idx;
+      while (scan < pieces.length) {
+        const p = pieces[scan]!;
+        if (/^\s+$/.test(p)) {
+          run.push(" ");
+          scan += 1;
+          continue;
+        }
+        if (!isMathWord(p)) break;
+        run.push(p);
+        lastMath = scan;
+        scan += 1;
+      }
+
+      const consumed = run.length ? pieces.slice(idx, lastMath + 1) : [];
+      const joined = consumed.join("");
+      const trail = joined.match(/[.,;:!?]+$/)?.[0] ?? "";
+      const core = trail ? joined.slice(0, -trail.length) : joined;
+
+      const isExpression = /[+\-*/^=<>]/.test(core) && core.replace(/\s/g, "").length > 2;
+      if (core && (isExpression || isAutoMath(core))) {
+        out.push(<Tex key={`${k}-m${(group += 1)}`} tex={toDesmosLatex(core)} />);
         if (trail) out.push(trail);
-        return;
+        idx = lastMath + 1;
+        continue;
       }
+
       out.push(piece);
-    });
+      idx += 1;
+    }
   };
+
 
   while ((m = re.exec(text))) {
     pushPlain(text.slice(last, m.index), `${keyBase}-p${i}`);

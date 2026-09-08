@@ -1,8 +1,15 @@
 import { useMemo, useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { DIFFICULTY_LEVELS, questionBankQuery, type Level } from "@/lib/practice";
 import { useTrackerProgress } from "@/lib/tracker-progress";
 import { LeaderboardCard } from "@/components/dashboard/leaderboard";
+import {
+  formatHours,
+  STUDY_AREA_LABEL,
+  studyTimeQuery,
+  totalsByArea,
+  type StudyArea,
+} from "@/lib/study-time";
 
 type Tf = "week" | "month" | "all";
 
@@ -13,20 +20,22 @@ const LEVEL_META: Record<Level, { label: string; color: string; text: string }> 
   challenge: { label: "Challenge", color: "bg-violet", text: "text-violet" },
 };
 
-const TIME_BY_AREA = [
-  { label: "Practice Problems", hours: 0, color: "var(--color-primary)" },
-  { label: "Mock Exams", hours: 0, color: "var(--color-violet)" },
-  { label: "Courses", hours: 0, color: "var(--color-emerald)" },
-  { label: "Vocab", hours: 0, color: "var(--color-amber)" },
-  { label: "Mistake Review", hours: 0, color: "var(--color-flame)" },
-  { label: "Lessons", hours: 0, color: "var(--color-primary)" },
-];
+const AREA_COLORS: Record<StudyArea, string> = {
+  practice: "var(--color-primary)",
+  mocks: "var(--color-violet)",
+  courses: "var(--color-emerald)",
+  vocab: "var(--color-amber)",
+  review: "var(--color-flame)",
+  lessons: "var(--color-primary)",
+};
+
+const AREA_ORDER: StudyArea[] = ["practice", "mocks", "lessons", "vocab", "review"];
 
 export function StatsSection() {
   const { data: rows } = useSuspenseQuery(questionBankQuery);
   const { entry } = useTrackerProgress();
-  const [progressTf, setProgressTf] = useState<Tf>("all");
   const [timeTf, setTimeTf] = useState<Tf>("all");
+  const { data: timeRows = [] } = useQuery(studyTimeQuery);
 
   const DIFFICULTY = useMemo(
     () =>
@@ -38,6 +47,7 @@ export function StatsSection() {
         return {
           ...LEVEL_META[level],
           done,
+          correct,
           acc: done ? Math.round((correct / done) * 100) : 0,
           total: levelRows.length,
         };
@@ -46,21 +56,22 @@ export function StatsSection() {
   );
 
   const attempted = DIFFICULTY.reduce((s, d) => s + d.done, 0);
-  const totalQs = DIFFICULTY.reduce((s, d) => s + d.total, 0);
-  const pct = totalQs ? Math.min(100, Math.round((attempted / totalQs) * 100)) : 0;
+  const correct = DIFFICULTY.reduce((s, d) => s + d.correct, 0);
+  const accuracy = attempted ? Math.round((correct / attempted) * 100) : 0;
+
+  const areaTotals = useMemo(() => totalsByArea(timeRows, timeTf), [timeRows, timeTf]);
+  const totalSeconds = AREA_ORDER.reduce((s, a) => s + areaTotals[a], 0);
 
   return (
     <div className="space-y-5">
       <div className="grid gap-5 xl:grid-cols-2">
         <Card>
-          <CardHeader title="Question Progress">
-            <Timeframe value={progressTf} onChange={setProgressTf} />
-          </CardHeader>
+          <CardHeader title="Accuracy" />
           <div className="flex flex-col items-center gap-6 p-5 sm:flex-row">
             <Donut
-              percent={pct}
-              center={`${pct}%`}
-              sub={`${attempted} / ${totalQs.toLocaleString()}`}
+              percent={accuracy}
+              center={`${accuracy}%`}
+              sub={`${correct} of ${attempted} correct`}
             />
             <div className="w-full flex-1 space-y-4">
               {DIFFICULTY.map((d) => (
@@ -68,14 +79,14 @@ export function StatsSection() {
                   <div className="flex items-baseline justify-between text-sm">
                     <span className="font-display font-semibold text-foreground">{d.label}</span>
                     <span className="text-muted-foreground">
-                      {d.done}/{d.total}
+                      {d.correct}/{d.done} correct
                       <span className={`ml-3 font-bold ${d.text}`}>{d.acc}% acc</span>
                     </span>
                   </div>
                   <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div
                       className={`h-full rounded-full ${d.color}`}
-                      style={{ width: `${d.total ? (d.done / d.total) * 100 : 0}%` }}
+                      style={{ width: `${d.acc}%` }}
                     />
                   </div>
                 </div>
@@ -89,16 +100,24 @@ export function StatsSection() {
             <Timeframe value={timeTf} onChange={setTimeTf} />
           </CardHeader>
           <div className="flex flex-col items-center gap-6 p-5 sm:flex-row">
-            <Donut percent={0} center="0h" sub="total" />
+            <Donut
+              percent={totalSeconds ? 100 : 0}
+              center={formatHours(totalSeconds)}
+              sub="total"
+            />
             <ul className="w-full flex-1 space-y-2">
-              {TIME_BY_AREA.map((a) => (
-                <li key={a.label} className="flex items-center gap-2 text-sm">
+              {AREA_ORDER.map((area) => (
+                <li key={area} className="flex items-center gap-2 text-sm">
                   <span
                     className="size-2.5 shrink-0 rounded-[3px]"
-                    style={{ backgroundColor: a.color }}
+                    style={{ backgroundColor: AREA_COLORS[area] }}
                   />
-                  <span className="min-w-0 flex-1 truncate text-foreground">{a.label}</span>
-                  <span className="font-bold text-muted-foreground">{a.hours}h</span>
+                  <span className="min-w-0 flex-1 truncate text-foreground">
+                    {STUDY_AREA_LABEL[area]}
+                  </span>
+                  <span className="font-bold text-muted-foreground">
+                    {formatHours(areaTotals[area])}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -110,6 +129,7 @@ export function StatsSection() {
     </div>
   );
 }
+
 
 
 function Timeframe({ value, onChange }: { value: Tf; onChange: (v: Tf) => void }) {

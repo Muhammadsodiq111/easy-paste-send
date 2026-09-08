@@ -1,3 +1,4 @@
+import { useStudyClock } from "@/lib/study-time";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Bookmark, ChevronLeft, ChevronRight, Filter, LayoutList, Square, X } from "lucide-react";
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/_authenticated/vocab/study")({
 });
 
 function StudyPage() {
+  useStudyClock("vocab");
   const { user } = Route.useRouteContext();
   const { category, mode, start, limit } = Route.useSearch();
   const navigate = useNavigate();

@@ -4,6 +4,7 @@ import { ChevronUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { formatClock, mockExamsQuery, mockQuestionsQuery, timingFor } from "@/lib/mocks";
+import { useStudyClock } from "@/lib/study-time";
 
 type Search = { timing: string };
 
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/mocks/$id")({
 });
 
 function ExamPage() {
+  useStudyClock("mocks");
   const { id } = Route.useParams();
   const { timing } = Route.useSearch();
   const navigate = useNavigate();
