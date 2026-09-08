@@ -91,7 +91,8 @@ export function TrackerSection() {
   }, [entries, rows]);
 
   const grandTotal = rows.length;
-  const pct = grandTotal ? Math.min(100, Math.round((totals.attempted / grandTotal) * 100)) : 0;
+  const pct = totals.attempted ? Math.round((totals.correct / totals.attempted) * 100) : 0;
+
 
 
   const attemptedIds = (ids: string[]) =>
