@@ -4,6 +4,7 @@ import { Bookmark, ChevronLeft, ChevronRight, Filter, LayoutList, Square, X } fr
 import { useMemo, useState } from "react";
 
 import {
+import { useStudyClock } from "@/lib/study-time";
   CATEGORIES,
   DIFFICULTY_STYLES,
   saveProgress,
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/_authenticated/vocab/study")({
 });
 
 function StudyPage() {
+  useStudyClock("vocab");
   const { user } = Route.useRouteContext();
   const { category, mode, start, limit } = Route.useSearch();
   const navigate = useNavigate();

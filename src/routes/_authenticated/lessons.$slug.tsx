@@ -6,6 +6,7 @@ import { findLesson, SUBJECT_LABELS, type LessonEntry } from "@/lib/courses";
 import { LessonBody } from "@/components/lesson-body";
 import { lessonContentQuery, toEmbedUrl } from "@/lib/lessons";
 import { lessonProgressQuery, setLessonCompleted } from "@/lib/lesson-progress";
+import { useStudyClock } from "@/lib/study-time";
 
 export const Route = createFileRoute("/_authenticated/lessons/$slug")({
   loader: ({ params }) => {
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/lessons/$slug")({
 });
 
 function LessonPage() {
+  useStudyClock("lessons");
   const { lesson } = Route.useLoaderData() as { lesson: LessonEntry };
   const { data: content } = useQuery(lessonContentQuery(lesson.slug));
   const queryClient = useQueryClient();

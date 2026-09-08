@@ -4,6 +4,7 @@ import { Check, ChevronDown, ChevronRight, Clock, Eraser, X } from "lucide-react
 import { useMemo, useState } from "react";
 
 import {
+import { useStudyClock } from "@/lib/study-time";
   CATEGORY_META,
   DIFFICULTY_BADGE,
   HIGHLIGHT_COLORS,
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/_authenticated/reading/$slug")({
 });
 
 function ReaderPage() {
+  useStudyClock("courses");
   const { slug } = Route.useParams();
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();

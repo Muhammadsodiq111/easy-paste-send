@@ -19,6 +19,7 @@ import {
 } from "@/lib/practice";
 import { findLessonForPractice, nextModuleTitle } from "@/lib/practice-nav";
 import { useTrackerProgress } from "@/lib/tracker-progress";
+import { useStudyClock } from "@/lib/study-time";
 
 
 type Search = { module: string; mode: "practice" | "diagnostic" };
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/_authenticated/practice/")({
 type Status = "correct" | "wrong";
 
 function PracticePage() {
+  useStudyClock("practice");
   const { module: moduleTitle, mode } = Route.useSearch();
   const navigate = useNavigate();
   const { entry, setStatus, toggleReviewed } = useTrackerProgress();
