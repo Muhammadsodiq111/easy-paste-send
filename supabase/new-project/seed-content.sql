@@ -30,9 +30,9 @@ values
  '["4x_1 + 9 = 33"]'::jsonb,'Type the equation and read x_1 from the slider list.',1),
 
 ('math','Linear Equations in 1 Variable','Isolating for One Variable','medium',
- 'If $\frac{2}{3}(6x - 9) = 5x - 4$, what is the value of $x$?','free','2',
+ 'If $\frac{2}{3}(6x - 9) = 5x - 4$, what is the value of $x$?','free','-2',
  '[]'::jsonb,0,
- '["Distribute: 4x - 6 = 5x - 4.","Subtract 4x: -6 = x - 4.","Add 4: x = -2... check sign: -6 + 4 = x, so x = -2.","Substituting x = -2 gives both sides -14, so x = -2."]'::jsonb,
+ '["Distribute: 4x - 6 = 5x - 4.","Subtract 4x from both sides: -6 = x - 4.","Add 4 to both sides: x = -2.","Check: both sides equal -14 when x = -2."]'::jsonb,
  '[]'::jsonb,'',2),
 
 ('math','Linear Equations in 1 Variable','Creating One Variable Equations','medium',
@@ -180,28 +180,36 @@ values
 
 -- English · Standard English Conventions
 ('english','Boundaries','Periods and Semicolons','easy',
- 'Choose the option that conforms to the conventions of Standard English.\n\nThe museum reopened last spring ______ it now attracts twice as many visitors.',
+ 'Choose the option that conforms to the conventions of Standard English.
+
+The museum reopened last spring ______ it now attracts twice as many visitors.',
  'mcq','',
  '["spring, it","spring; it","spring it","spring, and, it"]'::jsonb,1,
  '["Both halves are independent clauses.","A comma alone creates a comma splice.","A semicolon correctly joins two independent clauses."]'::jsonb,
  '[]'::jsonb,'',26),
 
 ('english','Boundaries','Commas','medium',
- 'Choose the option that conforms to the conventions of Standard English.\n\n______ the storm passed, the crew inspected the damaged sails.',
+ 'Choose the option that conforms to the conventions of Standard English.
+
+______ the storm passed, the crew inspected the damaged sails.',
  'mcq','',
  '["After","After,","After;","After:"]'::jsonb,0,
  '["\"After the storm passed\" is a dependent clause.","No punctuation belongs between the subordinating word and its clause.","The comma after \"passed\" already separates the clauses."]'::jsonb,
  '[]'::jsonb,'',27),
 
 ('english','Form, Structure, and Sense','Subject-Verb Agreement','medium',
- 'Choose the option that conforms to the conventions of Standard English.\n\nThe collection of rare manuscripts ______ housed in a climate-controlled vault.',
+ 'Choose the option that conforms to the conventions of Standard English.
+
+The collection of rare manuscripts ______ housed in a climate-controlled vault.',
  'mcq','',
  '["are","were","is","have been"]'::jsonb,2,
  '["The subject is \"collection,\" which is singular.","\"of rare manuscripts\" is a prepositional phrase, not the subject.","The singular verb \"is\" agrees."]'::jsonb,
  '[]'::jsonb,'',28),
 
 ('english','Form, Structure, and Sense','Modifier Placement','hard',
- 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nWhile reviewing the field notes, ______',
+ 'Which choice completes the text so that it conforms to the conventions of Standard English?
+
+While reviewing the field notes, ______',
  'mcq','',
  '["a pattern in the migration data became obvious.","the migration data revealed a pattern to the team.","the team noticed a pattern in the migration data.","there was a pattern noticed in the migration data."]'::jsonb,2,
  '["The opening phrase describes whoever is reviewing.","Only \"the team\" can perform the reviewing.","The other options create dangling modifiers."]'::jsonb,
@@ -209,7 +217,9 @@ values
 
 -- English · Information and Ideas
 ('english','Central Ideas & Details','Main Idea','medium',
- 'Bioluminescence, the production of light by living organisms, appears in fireflies, fungi, and a striking share of deep-sea animals. Because sunlight fades within the first few hundred meters of ocean water, many deep-sea species rely on self-produced light to lure prey, startle predators, and signal mates.\n\nWhich choice best states the main idea of the text?',
+ 'Bioluminescence, the production of light by living organisms, appears in fireflies, fungi, and a striking share of deep-sea animals. Because sunlight fades within the first few hundred meters of ocean water, many deep-sea species rely on self-produced light to lure prey, startle predators, and signal mates.
+
+Which choice best states the main idea of the text?',
  'mcq','',
  '["Fireflies and fungi produce more light than deep-sea animals do.","Sunlight cannot reach the deepest parts of the ocean.","Bioluminescence serves several survival functions, especially where sunlight is scarce.","Deep-sea animals evolved from shallow-water ancestors."]'::jsonb,2,
  '["The text defines bioluminescence and then lists its uses.","The emphasis is on why deep-sea species depend on it.","Choice C captures both the definition and the purpose."]'::jsonb,
