@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { DesmosEditor } from "@/components/practice/desmos-calculator";
 import { MathKeyboard } from "@/components/practice/math-keyboard";
-import { MathExplanation } from "@/components/practice/math-text";
+import { MathExplanation, MathInline } from "@/components/practice/math-text";
 import { AdminOnly } from "@/components/admin-only";
 import { supabase } from "@/integrations/supabase/external";
 import { formatDesmosSteps } from "@/lib/desmos-format";
@@ -526,6 +526,15 @@ function ManageQuestions() {
             />
           </label>
 
+          {prompt.trim() ? (
+            <div className="border-border bg-card rounded-2xl border p-4">
+              <p className="text-muted-foreground mb-2 text-[11px] font-bold tracking-[0.12em] uppercase">
+                Question preview
+              </p>
+              <MathExplanation lines={prompt.split("\n").filter((l) => l.trim())} />
+            </div>
+          ) : null}
+
           {questionType === "mcq" ? (
             <fieldset className="space-y-2">
               <legend className="text-foreground text-sm font-semibold">Answer choices (pick the correct one)</legend>
@@ -540,16 +549,23 @@ function ManageQuestions() {
                     className="accent-emerald h-4 w-4"
                   />
                   <span className="text-muted-foreground w-5 text-xs font-bold">{"ABCD"[i]}</span>
-                  <input
-                    ref={(el) => {
-                      choiceRefs.current[i] = el;
-                    }}
-                    value={choice}
-                    onFocus={() => setActive(`choice${i}`)}
-                    onChange={(e) => setChoices((c) => c.map((v, j) => (j === i ? e.target.value : v)))}
-                    placeholder={`Choice ${"ABCD"[i]}`}
-                    className={inputClass}
-                  />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <input
+                      ref={(el) => {
+                        choiceRefs.current[i] = el;
+                      }}
+                      value={choice}
+                      onFocus={() => setActive(`choice${i}`)}
+                      onChange={(e) => setChoices((c) => c.map((v, j) => (j === i ? e.target.value : v)))}
+                      placeholder={`Choice ${"ABCD"[i]}`}
+                      className={inputClass}
+                    />
+                    {choice.trim() ? (
+                      <p className="text-muted-foreground pl-1 text-sm">
+                        <MathInline text={choice} />
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </fieldset>
