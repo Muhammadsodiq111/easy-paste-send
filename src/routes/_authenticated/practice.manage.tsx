@@ -526,6 +526,15 @@ function ManageQuestions() {
             />
           </label>
 
+          {prompt.trim() ? (
+            <div className="border-border bg-card rounded-2xl border p-4">
+              <p className="text-muted-foreground mb-2 text-[11px] font-bold tracking-[0.12em] uppercase">
+                Question preview
+              </p>
+              <MathExplanation lines={prompt.split("\n").filter((l) => l.trim())} />
+            </div>
+          ) : null}
+
           {questionType === "mcq" ? (
             <fieldset className="space-y-2">
               <legend className="text-foreground text-sm font-semibold">Answer choices (pick the correct one)</legend>
