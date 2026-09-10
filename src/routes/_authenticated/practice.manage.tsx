@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { DesmosEditor } from "@/components/practice/desmos-calculator";
 import { MathKeyboard } from "@/components/practice/math-keyboard";
-import { MathExplanation } from "@/components/practice/math-text";
+import { MathExplanation, MathInline } from "@/components/practice/math-text";
 import { AdminOnly } from "@/components/admin-only";
 import { supabase } from "@/integrations/supabase/external";
 import { formatDesmosSteps } from "@/lib/desmos-format";
