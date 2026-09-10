@@ -549,16 +549,23 @@ function ManageQuestions() {
                     className="accent-emerald h-4 w-4"
                   />
                   <span className="text-muted-foreground w-5 text-xs font-bold">{"ABCD"[i]}</span>
-                  <input
-                    ref={(el) => {
-                      choiceRefs.current[i] = el;
-                    }}
-                    value={choice}
-                    onFocus={() => setActive(`choice${i}`)}
-                    onChange={(e) => setChoices((c) => c.map((v, j) => (j === i ? e.target.value : v)))}
-                    placeholder={`Choice ${"ABCD"[i]}`}
-                    className={inputClass}
-                  />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <input
+                      ref={(el) => {
+                        choiceRefs.current[i] = el;
+                      }}
+                      value={choice}
+                      onFocus={() => setActive(`choice${i}`)}
+                      onChange={(e) => setChoices((c) => c.map((v, j) => (j === i ? e.target.value : v)))}
+                      placeholder={`Choice ${"ABCD"[i]}`}
+                      className={inputClass}
+                    />
+                    {choice.trim() ? (
+                      <p className="text-muted-foreground pl-1 text-sm">
+                        <MathInline text={choice} />
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </fieldset>
