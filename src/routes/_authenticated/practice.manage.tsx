@@ -690,15 +690,19 @@ function ManageQuestions() {
 
 
           <div className="grid gap-3 sm:grid-cols-[1fr_140px]">
-            <label className="text-foreground space-y-1.5 text-sm font-semibold">
-              Desmos note
-              <input
-                value={desmosNote}
-                onChange={(e) => setDesmosNote(e.target.value)}
-                placeholder="Desmos regression solves for x_1 instantly here."
-                className={inputClass}
-              />
-            </label>
+            {isMath ? (
+              <label className="text-foreground space-y-1.5 text-sm font-semibold">
+                Desmos note
+                <input
+                  value={desmosNote}
+                  onChange={(e) => setDesmosNote(e.target.value)}
+                  placeholder="Desmos regression solves for x_1 instantly here."
+                  className={inputClass}
+                />
+              </label>
+            ) : (
+              <div />
+            )}
             <label className="text-foreground space-y-1.5 text-sm font-semibold">
               Order
               <input
@@ -709,6 +713,7 @@ function ManageQuestions() {
               />
             </label>
           </div>
+
 
           <button
             disabled={busy}
