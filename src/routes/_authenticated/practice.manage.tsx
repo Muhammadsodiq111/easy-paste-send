@@ -106,7 +106,9 @@ function ManageQuestions() {
   const [importText, setImportText] = useState("");
   const [importErrors, setImportErrors] = useState<string[]>([]);
 
+  const isMath = subject === "math";
   const topics = useMemo(() => topicsForSubject(subject), [subject]);
+
   const currentTopic = topics.find((t) => t.title === topic);
   const modules = currentTopic?.modules ?? [];
   const subtopics = modules.find((m) => m.title === moduleTitle)?.subtopics ?? [];
@@ -157,7 +159,18 @@ function ManageQuestions() {
     setSubtopic("");
     setCustomModule(false);
     setCustomSubtopic(false);
+    if (value !== "math") {
+      // Reading & Writing questions are multiple choice and have no calculator work.
+      setQuestionType("mcq");
+      setAnswerText("");
+      setDesmos("");
+      setDesmosState(null);
+      setDesmosNote("");
+      setDesmosSeed((n) => n + 1);
+      setActive("prompt");
+    }
   }
+
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -488,30 +501,37 @@ function ManageQuestions() {
             </label>
           </div>
 
-          <div className="border-border bg-background/60 flex flex-wrap items-center gap-2 rounded-2xl border p-3">
-            <span className="text-muted-foreground text-[11px] font-bold tracking-[0.12em] uppercase">
-              Answer format
-            </span>
-            {(
-              [
-                { id: "mcq" as const, label: "Multiple choice" },
-                { id: "free" as const, label: "Student-produced response" },
-              ]
-            ).map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setQuestionType(t.id)}
-                className={`rounded-xl border px-4 py-2 text-xs font-bold transition-colors ${
-                  questionType === t.id
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          {isMath ? (
+            <div className="border-border bg-background/60 flex flex-wrap items-center gap-2 rounded-2xl border p-3">
+              <span className="text-muted-foreground text-[11px] font-bold tracking-[0.12em] uppercase">
+                Answer format
+              </span>
+              {(
+                [
+                  { id: "mcq" as const, label: "Multiple choice" },
+                  { id: "free" as const, label: "Student-produced response" },
+                ]
+              ).map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setQuestionType(t.id)}
+                  className={`rounded-xl border px-4 py-2 text-xs font-bold transition-colors ${
+                    questionType === t.id
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="border-border bg-background/60 text-muted-foreground rounded-2xl border p-3 text-xs">
+              Reading &amp; Writing questions are always multiple choice with four answer choices.
+            </p>
+          )}
+
 
           <label className="text-foreground block space-y-1.5 text-sm font-semibold">
             Question
@@ -599,12 +619,15 @@ function ManageQuestions() {
                 className={`${inputClass} font-mono text-xs`}
               />
             </label>
-            <MathKeyboard
-              getTarget={activeField.get}
-              value={activeField.value}
-              onChange={activeField.onChange}
-              label={activeField.label}
-            />
+            {isMath ? (
+              <MathKeyboard
+                getTarget={activeField.get}
+                value={activeField.value}
+                onChange={activeField.onChange}
+                label={activeField.label}
+              />
+            ) : null}
+
             <div className="border-border bg-card rounded-2xl border p-4">
               <p className="text-muted-foreground mb-2 text-[11px] font-bold tracking-[0.12em] uppercase">
                 Live preview
