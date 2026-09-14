@@ -615,6 +615,7 @@ function ManageQuestions() {
 
 
 
+          {isMath ? (
           <div className="border-border bg-background/60 space-y-3 rounded-2xl border p-4">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-foreground text-sm font-semibold">Desmos solution — type it right here</h3>
@@ -687,6 +688,8 @@ function ManageQuestions() {
               )}
             </div>
           </div>
+          ) : null}
+
 
 
           <div className="grid gap-3 sm:grid-cols-[1fr_140px]">
